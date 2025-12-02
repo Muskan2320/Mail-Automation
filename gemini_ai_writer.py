@@ -7,7 +7,7 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-def generate_mail_dict(jd_text, resume_text=None):
+def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
     """
     Generates structured email data (recipient, subject, body)
     based on JD and optional resume.
@@ -21,6 +21,8 @@ def generate_mail_dict(jd_text, resume_text=None):
 
     --- RESUME ---
     {resume_text if resume_text else "Resume data not available. Use job description only."}
+    --- RESUME LINKS ---
+    {json.dumps(resume_links) if resume_links else "No links available."}
 
     --- TASK ---
     1. Identify recipient email from JD if present. If not present, return null.
@@ -36,6 +38,8 @@ def generate_mail_dict(jd_text, resume_text=None):
        [Phone number]
        GitHub: [Github link] 
        LinkedIn:[Linkedin link]
+
+    You will find phone number, github and linkedin links in the resume if provided. Don't mention if not available.
 
     {{
         "recipient": "email_or_null",
