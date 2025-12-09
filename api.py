@@ -40,6 +40,7 @@ async def send_email_api(
 ):
     resume_text = None
     resume_path = None
+    resume_links = None
 
     # Handle optional resume
     if resume_file:
@@ -69,12 +70,18 @@ async def send_email_api(
         })
 
     # Send the email
-    send_email(
+    success = send_email(
         recipient_email=recipient,
         subject=subject,
         body=body,
         attachment_path=resume_path
     )
+
+    if not success:
+        raise HTTPException(
+            status_code=500,
+            detail="Email sending failed via both OAuth and SMTP."
+        )
 
     if resume_path: os.remove(resume_path)
 
