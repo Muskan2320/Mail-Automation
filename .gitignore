@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# Secrets
+.env
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.pyc
+
+# Local files
+resume_muskan.pdf
+jd.txt
