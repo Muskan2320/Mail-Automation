@@ -6,87 +6,107 @@ import os
 import tempfile
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="AI Job Application Email Generator API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/generate-email")
 async def generate_email_api(
     jd_text: str = Form(...),
     resume_file: UploadFile | None = File(None)
 ):
-    resume_text, resume_links = None, None
+    try:
+        resume_text, resume_links = None, None
 
-    if resume_file:
-        if resume_file.content_type != "application/pdf":
-            raise HTTPException(status_code=400, detail="Only PDF resumes allowed.")
+        if resume_file:
+            if resume_file.content_type != "application/pdf":
+                raise HTTPException(status_code=400, detail="Only PDF resumes allowed.")
 
-        # Save temp file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(await resume_file.read())
-            resume_path = tmp.name
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(await resume_file.read())
+                resume_path = tmp.name
 
-        resume_text, resume_links = extract_text_from_pdf(resume_path)
-        os.remove(resume_path)
+            resume_text, resume_links = extract_text_from_pdf(resume_path)
+            os.remove(resume_path)
 
-    email_data = generate_mail_dict(jd_text, resume_text, resume_links)
-    
-    return JSONResponse({"status": "success", "data": email_data})
+        email_data = generate_mail_dict(jd_text, resume_text, resume_links)
 
+        if email_data.get("error"):
+            raise HTTPException(status_code=500, detail="AI failed to generate email")
 
-@app.post("/send-email")
-async def send_email_api(
-    jd_text: str = Form(...),
-    resume_file: UploadFile | None = File(None)
-):
-    resume_text = None
-    resume_path = None
-    resume_links = None
-
-    # Handle optional resume
-    if resume_file:
-        if resume_file.content_type != "application/pdf":
-            raise HTTPException(status_code=400, detail="Resume must be PDF")
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(await resume_file.read())
-            resume_path = tmp.name
-            resume_text, resume_links = extract_text_from_pdf(tmp.name)
-
-    # AI Extracted email fields
-    email_data = generate_mail_dict(jd_text, resume_text, resume_links)
-    
-    if email_data.get("error"):
-        raise HTTPException(status_code=500, detail="AI failed to return valid email fields")
-
-    recipient = email_data.get("recipient")
-    subject = email_data.get("subject")
-    body = email_data.get("body")
-
-    if not all([recipient, subject, body]):
         return JSONResponse({
-            "status": "incomplete_fields",
-            "message": "Email not sent — Missing required values",
+            "status": "success",
             "data": email_data
         })
 
-    # Send the email
-    success = send_email(
-        recipient_email=recipient,
-        subject=subject,
-        body=body,
-        attachment_path=resume_path
-    )
-
-    if not success:
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail="Email sending failed via both OAuth and SMTP."
+            detail=f"Unexpected error during generation: {str(e)}"
         )
 
-    if resume_path: os.remove(resume_path)
+@app.post("/send-email")
+async def send_email_api(
+    recipient: str = Form(...),
+    subject: str = Form(...),
+    body: str = Form(...),
+    resume_file: UploadFile | None = File(None)
+):
+    resume_path = None
 
-    return {
-        "status": "email_sent",
-        "recipient": recipient,
-        "subject": subject
-    }
+    try:
+        # Optional resume attachment
+        if resume_file:
+            if resume_file.content_type != "application/pdf":
+                raise HTTPException(status_code=400, detail="Resume must be PDF")
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(await resume_file.read())
+                resume_path = tmp.name
+
+        # Validate required fields
+        if not all([recipient.strip(), subject.strip(), body.strip()]):
+            raise HTTPException(
+                status_code=400,
+                detail="Recipient, subject, and body are required."
+            )
+
+        success = send_email(
+            recipient_email=recipient,
+            subject=subject,
+            body=body,
+            attachment_path=resume_path
+        )
+
+        if not success:
+            raise HTTPException(
+                status_code=500,
+                detail="Email sending failed via both OAuth and SMTP."
+            )
+
+        return {
+            "status": "email_sent",
+            "recipient": recipient,
+            "subject": subject
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error while sending email: {str(e)}"
+        )
+    finally:
+        if resume_path and os.path.exists(resume_path):
+            os.remove(resume_path)
