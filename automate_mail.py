@@ -25,7 +25,7 @@ def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None):
         message['To'] = recipient_email
         message['From'] = SENDER_EMAIL
         message['Subject'] = subject
-        message.set_content(body)
+        message.set_content(body, subtype='html')
 
         if attachment_path:
             print(f"Attachment path provided: {attachment_path}")
@@ -71,7 +71,7 @@ def send_mail_via_smtp(recipient_email, subject, body, attachment_path=None):
     msg['From'] = SENDER_EMAIL
     msg['To'] = recipient_email
     msg['Subject'] = subject
-    msg.set_content(body)
+    msg.set_content(body, subtype='html')
 
     if attachment_path:
         print(f"Attachment path provided: {attachment_path}")
