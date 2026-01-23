@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react';
+const ReactQuill = lazy(() => import('react-quill-new'));
+import 'react-quill-new/dist/quill.snow.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, FileText, Sparkles, Loader2, Mail, Briefcase } from 'lucide-react';
 
 function App() {
   const [jdText, setJdText] = useState("");
@@ -11,10 +15,11 @@ function App() {
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   const handleGenerate = async () => {
     if (!jdText) {
-      alert("Please enter Job Description");
+      showMessage("Please enter Job Description", "error");
       return;
     }
 
@@ -32,28 +37,28 @@ function App() {
         method: "POST",
         body: formData
       });
-    
+
       const data = await res.json();
-    
+
       if (!res.ok) {
-        throw new Erro(data.detail || "Failed to generate email");
+        throw new Error(data.detail || "Failed to generate email");
       }
 
       setRecipient(data.data.recipient || "");
       setSubject(data.data.subject || "");
       setBody(data.data.body || "");
-      
-      setMessage("Email generated successfully!");
+
+      showMessage("Email generated successfully!", "success");
     } catch (error) {
-      setMessage(error.message);
+      showMessage(error.message, "error");
     } finally {
       setGenerating(false);
     }
   };
 
   const handleSend = async () => {
-    if(!recipient || !subject || !body) {
-      alert("Recipient, Subject and Body are required to send email");
+    if (!recipient || !subject || !body) {
+      showMessage("Recipient, Subject and Body are required to send email", "error");
       return;
     }
 
@@ -73,83 +78,190 @@ function App() {
         method: "POST",
         body: formData
       });
-      
+
       const data = await res.json();
 
       if (!res.ok) {
         throw new Error(data.detail || "Failed to send email");
       }
 
-      setMessage("Email sent successfully!");
+      showMessage("Email sent successfully!", "success");
     } catch (error) {
-      setMessage(error.message);
+      showMessage(error.message, "error");
     } finally {
       setSending(false);
     }
   };
 
+  const showMessage = (msg, type) => {
+    setMessage(msg);
+    setMessageType(type);
+    setTimeout(() => setMessage(""), 5000);
+  };
+
   return (
-    <div style={{ padding: "40px", maxWidth: "800px", margin: "auto"}}>
-      <h2>Job Application Email Generator</h2>
-      
-      <textarea
-        placeholder = "Paste Job Description here..."
-        value = {jdText}
-        onChange = {(e) => setJdText(e.target.value)}
-        rows = {6}
-        style = {{ width: "100%"}}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6 md:p-12">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-      <br /><br />
+        {/* Left Column: Input Section */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-6"
+        >
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/50">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-indigo-100 rounded-lg text-indigo-600">
+                <Briefcase size={24} />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800">Job Details</h2>
+            </div>
 
-      <input
-        type = "file"
-        accept = "application/pdf"
-        onChange={(e) => setResumeFile(e.target.files[0])}
-      />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Job Description</label>
+                <textarea
+                  placeholder="Paste the job description here..."
+                  value={jdText}
+                  onChange={(e) => setJdText(e.target.value)}
+                  rows={8}
+                  className="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-indigo-500 focus:ring-indigo-500 transition-all resize-none p-4 text-slate-600"
+                />
+              </div>
 
-      <br /><br />
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Resume (PDF)</label>
+                <div className="relative group">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => setResumeFile(e.target.files[0])}
+                    className="block w-full text-sm text-slate-500
+                      file:mr-4 file:py-2.5 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-indigo-50 file:text-indigo-700
+                      hover:file:bg-indigo-100
+                      cursor-pointer border border-slate-200 rounded-lg bg-slate-50"
+                  />
+                </div>
+              </div>
 
-      <button onClick={handleGenerate} disabled={generating}>
-        {generating ? "Generating..." : "Generate Email"}
-      </button>
-      <hr/>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleGenerate}
+                disabled={generating}
+                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    Generating Magic...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={20} />
+                    Generate Email
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
 
-      <input
-        placeholder="Recipient"
-        value={recipient}
-        onChange={(e) => setRecipient(e.target.value)}
-        style={{ width: "100%"}}
-      />
+        {/* Right Column: Email Editor */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="space-y-6"
+        >
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/50 h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-purple-100 rounded-lg text-purple-600">
+                <Mail size={24} />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800">Email Draft</h2>
+            </div>
 
-      <br /><br />
+            <div className="space-y-4 flex-1">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-slate-400 text-sm font-medium">To:</span>
+                  <input
+                    placeholder="recipient@example.com"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    className="w-full pl-12 pr-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 focus:border-purple-500 focus:ring-purple-500 transition-all"
+                  />
+                </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-slate-400 text-sm font-medium">Subject:</span>
+                  <input
+                    placeholder="Regarding Job Application..."
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className="w-full pl-20 pr-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 focus:border-purple-500 focus:ring-purple-500 transition-all"
+                  />
+                </div>
+              </div>
 
-      <input
-        placeholder="Subject"
-        value={subject}
-        onChange={(e) => setSubject(e.target.value)}
-        style={{ width: "100%"}}
-      />
+              <div className="flex-1">
+                <Suspense fallback={<div className="h-64 bg-slate-50 rounded-lg animate-pulse"></div>}>
+                  <ReactQuill
+                    theme="snow"
+                    value={body}
+                    onChange={setBody}
+                    className="bg-slate-50 rounded-lg"
+                    placeholder="Your email content will be generated here..."
+                  />
+                </Suspense>
+              </div>
 
-      <br /><br />
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSend}
+                disabled={sending}
+                className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium shadow-lg hover:shadow-slate-900/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-auto"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={20} />
+                    Send Application
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
 
-      <textarea
-        placeholder = "Email Body"
-        value = {body}
-        onChange = {(e) => setBody(e.target.value)}
-        rows = {8}
-        style = {{ width: "100%"}}
-      />
+      </div>
 
-      <br /><br />
-
-      <button onClick={handleSend} disabled={sending}>
-        {sending ? "Sending..." : "Send Email"}
-      </button>
-
-      {message && <p>{message}</p>}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className={`fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-lg border backdrop-blur-md ${messageType === 'error'
+              ? 'bg-red-50/90 border-red-200 text-red-600'
+              : 'bg-emerald-50/90 border-emerald-200 text-emerald-600'
+              }`}
+          >
+            {message}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-export default App
+export default App;
