@@ -18,14 +18,15 @@ def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None):
         service = get_gmail_service()
 
         if service is None:
-            print("⚠ OAuth authentication failed — using SMTP fallback.")
+            print("OAuth authentication failed — using SMTP fallback.")
             return False
         
         message = EmailMessage()
         message['To'] = recipient_email
         message['From'] = SENDER_EMAIL
         message['Subject'] = subject
-        message.set_content(body, subtype='html')
+        
+        message.set_content(body, subtype="html")
 
         if attachment_path:
             print(f"Attachment path provided: {attachment_path}")
@@ -71,7 +72,10 @@ def send_mail_via_smtp(recipient_email, subject, body, attachment_path=None):
     msg['From'] = SENDER_EMAIL
     msg['To'] = recipient_email
     msg['Subject'] = subject
-    msg.set_content(body, subtype='html')
+    msg['Subject'] = subject
+    
+    msg.set_content(body, subtype="html")
+
 
     if attachment_path:
         print(f"Attachment path provided: {attachment_path}")

@@ -30,22 +30,22 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
     3. Write a short, professional, personalized body (4–6 lines), using resume if available.
     4. Do not use a template tone or cliché language.
     5. Output ONLY valid JSON in the following format:
-    6. Ending of the mail should look like this:
-       Looking forward to hearing from you
-
+    6. Ending of the mail should look like this (keep it compact with NO space between lines):
        Best Regards,
        Muskan Mulyan
        [Phone number]
        GitHub: [Github link] 
        LinkedIn:[Linkedin link]
 
-    You will find phone number, github and linkedin links in the resume if provided. Don't mention if not available.
+    You will find phone number, github and linkedin links in the resume if provided. Don't mention if not available. Returns lines immediately one after another without empty lines in between for the signature.
 
     {{
         "recipient": "email_or_null",
         "subject": "subject line here",
         "body": "mail body here"
     }}
+
+    NOTE: Maintain the format, spacing, line change and data you are generating is inserted into the text editor, so if require highlight the important text also.
     """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
@@ -56,9 +56,11 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
         text = text.strip("`")
         text = text.replace("json", "", 1).strip()
 
-    # Parse JSON safely
     try:
         data = json.loads(text)
+        
+        if "body" in data and data["body"]:
+            data["body"] = data["body"].replace("\n", "<br>")
         return data
     except Exception:
         return {"error": "Invalid AI JSON format", "raw": response.text}
