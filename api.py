@@ -4,6 +4,7 @@ from automate_mail import send_email
 
 import os
 import tempfile
+import shutil
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,6 +64,7 @@ async def send_email_api(
     resume_file: UploadFile | None = File(None)
 ):
     resume_path = None
+    tmp_dir = None
 
     try:
         # Optional resume attachment
@@ -70,9 +72,16 @@ async def send_email_api(
             if resume_file.content_type != "application/pdf":
                 raise HTTPException(status_code=400, detail="Resume must be PDF")
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(await resume_file.read())
-                resume_path = tmp.name
+            # Create a temporary directory to store the file with its original name
+            tmp_dir = tempfile.mkdtemp()
+            # Sanitize filename (basic) - relying on werkzeug's secure_filename equivalent is better but for now usage of os.path.basename on client provided filename is a start, 
+            # but usually filename from UploadFile is just the name. 
+            # To be safe, we just use the name provided.
+            original_filename = resume_file.filename
+            resume_path = os.path.join(tmp_dir, original_filename)
+            
+            with open(resume_path, "wb") as f:
+                f.write(await resume_file.read())
 
         # Validate required fields
         if not all([recipient.strip(), subject.strip(), body.strip()]):
@@ -108,5 +117,5 @@ async def send_email_api(
             detail=f"Unexpected error while sending email: {str(e)}"
         )
     finally:
-        if resume_path and os.path.exists(resume_path):
-            os.remove(resume_path)
+        if tmp_dir and os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir)
