@@ -13,7 +13,7 @@ SENDER_EMAIL = os.getenv('sender_email')
 SENDER_PASSWORD = os.getenv('sender_password')
 MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024
 
-def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None):
+def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None, cc_emails=None):
     try:
         service = get_gmail_service()
 
@@ -27,6 +27,9 @@ def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None):
         message['Subject'] = subject
         
         message.set_content(body, subtype="html")
+
+        if cc_emails:
+            message['Cc'] = cc_emails
 
         if attachment_path:
             print(f"Attachment path provided: {attachment_path}")
@@ -67,15 +70,16 @@ def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None):
         return False
 
 # Fallback to SMTP if Gmail API fails
-def send_mail_via_smtp(recipient_email, subject, body, attachment_path=None):
+def send_mail_via_smtp(recipient_email, subject, body, attachment_path=None, cc_emails=None):
     msg = EmailMessage()
     msg['From'] = SENDER_EMAIL
     msg['To'] = recipient_email
     msg['Subject'] = subject
-    msg['Subject'] = subject
     
     msg.set_content(body, subtype="html")
 
+    if cc_emails:
+        msg['Cc'] = cc_emails
 
     if attachment_path:
         print(f"Attachment path provided: {attachment_path}")
@@ -109,11 +113,11 @@ def send_mail_via_smtp(recipient_email, subject, body, attachment_path=None):
         print(f"SMTP fallback failed to send email: {e}")
         return False
 
-def send_email(recipient_email, subject, body, attachment_path=None):
+def send_email(recipient_email, subject, body, attachment_path=None, cc_emails=None):
     print("Attempting to send email via Gmail API...")
 
     # First attempt: OAuth Gmail API
-    success = send_mail_via_oauth(recipient_email, subject, body, attachment_path)
+    success = send_mail_via_oauth(recipient_email, subject, body, attachment_path, cc_emails)
 
     if success:
         print("Email sent via Gmail API")
@@ -121,7 +125,7 @@ def send_email(recipient_email, subject, body, attachment_path=None):
 
     # Fallback: SMTP
     print("OAuth failed — falling back to SMTP...")
-    smtp_success = send_mail_via_smtp(recipient_email, subject, body, attachment_path)
+    smtp_success = send_mail_via_smtp(recipient_email, subject, body, attachment_path, cc_emails)
 
     if smtp_success:
         print("Email sent via SMTP fallback")
