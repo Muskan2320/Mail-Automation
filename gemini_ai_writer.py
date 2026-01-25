@@ -25,12 +25,13 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
     {json.dumps(resume_links) if resume_links else "No links available."}
 
     --- TASK ---
-    1. Identify recipient email from JD if present. If not present, return null.
-    2. Create a short subject line either as per instructions in JD (if mentioned) or based on job title  (max 7 words).
-    3. Write a short, professional, personalized body (4–6 lines), using resume if available.
-    4. Do not use a template tone or cliché language.
-    5. Output ONLY valid JSON in the following format:
-    6. Ending of the mail should look like this (keep it compact with NO space between lines):
+    1. Identify recipient email from JD if present. If not present, return null. If more than one email is present, write them comma separated.
+    2. Identify CC email from JD if present. If not present, return null. If more than one email is present, write them comma separated.
+    3. Create a short subject line either as per instructions in JD (if mentioned) or based on job title  (max 7 words).
+    4. Write a short, professional, personalized body (2–5 lines i.e. not more than a paragraph), using resume if available.
+    5. Do not use a template tone or cliché language.
+    6. Output ONLY valid JSON in the following format:
+    7. Ending of the mail should look like this (keep it compact with NO space between lines):
        Best Regards,
        Muskan Mulyan
        [Phone number]
@@ -41,6 +42,7 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
 
     {{
         "recipient": "email_or_null",
+        "cc": "cc_email_or_null",
         "subject": "subject line here",
         "body": "mail body here"
     }}
