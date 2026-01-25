@@ -61,6 +61,7 @@ async def send_email_api(
     recipient: str = Form(...),
     subject: str = Form(...),
     body: str = Form(...),
+    cc: str | None = Form(None),
     resume_file: UploadFile | None = File(None)
 ):
     resume_path = None
@@ -72,14 +73,9 @@ async def send_email_api(
             if resume_file.content_type != "application/pdf":
                 raise HTTPException(status_code=400, detail="Resume must be PDF")
 
-            # Create a temporary directory to store the file with its original name
             tmp_dir = tempfile.mkdtemp()
-            # Sanitize filename (basic) - relying on werkzeug's secure_filename equivalent is better but for now usage of os.path.basename on client provided filename is a start, 
-            # but usually filename from UploadFile is just the name. 
-            # To be safe, we just use the name provided.
-            original_filename = resume_file.filename
-            resume_path = os.path.join(tmp_dir, original_filename)
-            
+            resume_path = os.path.join(tmp_dir, resume_file.filename)
+
             with open(resume_path, "wb") as f:
                 f.write(await resume_file.read())
 
@@ -90,11 +86,17 @@ async def send_email_api(
                 detail="Recipient, subject, and body are required."
             )
 
+        # CC handling (already comma-separated)
+        cc_emails = None
+        if cc and cc.strip():
+            cc_emails = cc.strip()
+
         success = send_email(
             recipient_email=recipient,
             subject=subject,
             body=body,
-            attachment_path=resume_path
+            attachment_path=resume_path,
+            cc_emails=cc_emails
         )
 
         if not success:
@@ -106,6 +108,7 @@ async def send_email_api(
         return {
             "status": "email_sent",
             "recipient": recipient,
+            "cc": cc_emails,
             "subject": subject
         }
 
