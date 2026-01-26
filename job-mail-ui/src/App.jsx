@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, FileText, Sparkles, Loader2, Mail, Briefcase } from 'lucide-react';
 
 function App() {
-  const [jdText, setJdText] = useState("");
+  const [jdText, setJdText] = useState("We are hiring for Junior AI/ML developer at example.com. We need people with 1 year of experience. Interested candidates mail at hr@example..com or hra@example.com and keep ceo@example.com in cc");
   const [resumeFile, setResumeFile] = useState(null);
 
   const [recipient, setRecipient] = useState("");
+  const [cc, setCc] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
 
@@ -45,6 +46,7 @@ function App() {
       }
 
       setRecipient(data.data.recipient || "");
+      setCc(data.data.cc || "");
       setSubject(data.data.subject || "");
       setBody(data.data.body || "");
 
@@ -67,6 +69,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("recipient", recipient);
+    formData.append("cc", cc);
     formData.append("subject", subject);
     formData.append("body", body);
     if (resumeFile) {
@@ -188,12 +191,22 @@ function App() {
 
             <div className="space-y-4 flex-1">
               <div className="grid grid-cols-1 gap-4">
+
                 <div className="relative">
                   <span className="absolute left-4 top-3 text-slate-400 text-sm font-medium">To:</span>
                   <input
                     placeholder="recipient@example.com"
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
+                    className="w-full pl-12 pr-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 focus:border-purple-500 focus:ring-purple-500 transition-all"
+                  />
+                </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-slate-400 text-sm font-medium">CC:</span>
+                  <input
+                    placeholder="cc@example.com"
+                    value={cc}
+                    onChange={(e) => setCc(e.target.value)}
                     className="w-full pl-12 pr-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 focus:border-purple-500 focus:ring-purple-500 transition-all"
                   />
                 </div>
@@ -243,7 +256,7 @@ function App() {
           </div>
         </motion.div>
 
-      </div>
+      </div >
 
       <AnimatePresence>
         {message && (
@@ -260,7 +273,7 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </div >
   );
 }
 
