@@ -2,7 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 const ReactQuill = lazy(() => import('react-quill-new'));
 import 'react-quill-new/dist/quill.snow.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, FileText, Sparkles, Loader2, Mail, Briefcase } from 'lucide-react';
+import { Send, FileText, Sparkles, Loader2, Mail, Briefcase, X } from 'lucide-react';
 
 function App() {
   const [jdText, setJdText] = useState("We are hiring for Junior AI/ML developer at example.com. We need people with 1 year of experience. Interested candidates mail at hr@example..com or hra@example.com and keep ceo@example.com in cc");
@@ -123,7 +123,20 @@ function App() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Job Description</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-700">Job Description</label>
+                  {jdText && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setJdText("")}
+                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                      title="Clear job description"
+                    >
+                      <X size={18} />
+                    </motion.button>
+                  )}
+                </div>
                 <textarea
                   placeholder="Paste the job description here..."
                   value={jdText}
