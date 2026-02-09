@@ -1,5 +1,5 @@
 from parse_resume_pdf import extract_text_from_pdf
-from gemini_ai_writer import generate_mail_dict
+from gemini_ai_writer import generate_mail_dict, regenerate_mail_body
 from automate_mail import send_email
 
 import os

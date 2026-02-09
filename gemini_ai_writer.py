@@ -67,7 +67,7 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
     except Exception:
         return {"error": "Invalid AI JSON format", "raw": response.text}
 
-def regenerate_mail_body(original_body: str, instructions: str | None = Form(None), resume_text: str | None = None):
+def regenerate_mail_body(original_body: str, instruction: str | None = None, resume_text: str | None = None):
     """
     Regenerates ONLY the email body based on a user instruction.
     """
