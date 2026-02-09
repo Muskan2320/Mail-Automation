@@ -122,3 +122,54 @@ async def send_email_api(
     finally:
         if tmp_dir and os.path.exists(tmp_dir):
             shutil.rmtree(tmp_dir)
+
+@app.post("/regenerate-body")
+async def regenerate_body_api(
+    original_body: str = Form(...),
+    instruction: str | None = Form(None),
+    resume_file: UploadFile | None = File(None)
+):
+    resume_text = None
+
+    try:
+        if not original_body.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Original email body is required to regenerate."
+            )
+
+        if resume_file:
+            if resume_file.content_type != "application/pdf":
+                raise HTTPException(status_code=400, detail="Resume must be PDF")
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(await resume_file.read())
+                resume_path = tmp.name
+
+            resume_text, _ = extract_text_from_pdf(resume_path)
+            os.remove(resume_path)
+
+        final_instruction = (
+            instruction.strip()
+            if instruction and instruction.strip()
+            else "Rewrite the email to be clearer and more concise while keeping the same intent."
+        )
+
+        new_body = regenerate_mail_body(
+            original_body=original_body,
+            instruction=final_instruction,
+            resume_text=resume_text
+        )
+
+        return {
+            "status": "success",
+            "body": new_body
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to regenerate email body: {str(e)}"
+        )

@@ -66,3 +66,38 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
         return data
     except Exception:
         return {"error": "Invalid AI JSON format", "raw": response.text}
+
+def regenerate_mail_body(original_body: str, instructions: str | None = Form(None), resume_text: str | None = None):
+    """
+    Regenerates ONLY the email body based on a user instruction.
+    """
+    
+    final_instruction = (
+        instruction.strip()
+        if instruction and instruction.strip()
+        else "Rewrite the email to be clearer and more concise while keeping the same intent."
+    )
+
+    prompt = f"""
+    You are an intelligent assistant helping refine professional emails.
+
+    --- ORIGINAL EMAIL BODY ---
+    {original_body}
+
+    --- USER INSTRUCTION ---
+    {final_instruction}
+
+    --- RESUME CONTEXT ---
+    {resume_text if resume_text else "Resume not available."}
+
+    --- TASK ---
+    Rewrite ONLY the email body based on the instruction.
+    Keep it professional and concise.
+    Do NOT add subject or recipient.
+    Return ONLY the rewritten body as plain text.
+    """
+
+    model = genai.GenerativeModel("gemini-2.5-flash")
+    response = model.generate_content(prompt)
+
+    return response.text.strip()
