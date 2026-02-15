@@ -2,7 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 const ReactQuill = lazy(() => import('react-quill-new'));
 import 'react-quill-new/dist/quill.snow.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, FileText, Sparkles, Loader2, Mail, Briefcase, X } from 'lucide-react';
+import { Send, FileText, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react';
 
 function App() {
   const [jdText, setJdText] = useState("We are hiring for Junior AI/ML developer at example.com. We need people with 1 year of experience. Interested candidates mail at hr@example..com or hra@example.com and keep ceo@example.com in cc");
@@ -15,6 +15,8 @@ function App() {
 
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
 
@@ -34,7 +36,7 @@ function App() {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/generate-email", {
+      const res = await fetch("http://localhost:5000/generate-email", {
         method: "POST",
         body: formData
       });
@@ -49,6 +51,7 @@ function App() {
       setCc(data.data.cc || "");
       setSubject(data.data.subject || "");
       setBody(data.data.body || "");
+      setHasGenerated(true);
 
       showMessage("Email generated successfully!", "success");
     } catch (error) {
@@ -67,17 +70,24 @@ function App() {
     setSending(true);
     setMessage("");
 
+    // Process body to remove extra paragraph spacing from ReactQuill
+    // Convert <p>...</p> to content with <br> for line breaks
+    let processedBody = body
+      .replace(/<p>/gi, '')           // Remove opening <p> tags
+      .replace(/<\/p>/gi, '<br>')     // Replace closing </p> with <br>
+      .replace(/(<br>\s*){2,}/gi, '<br>'); // Remove multiple consecutive <br> tags
+
     const formData = new FormData();
     formData.append("recipient", recipient);
     formData.append("cc", cc);
     formData.append("subject", subject);
-    formData.append("body", body);
+    formData.append("body", processedBody);
     if (resumeFile) {
       formData.append("resume_file", resumeFile);
     }
 
     try {
-      const res = await fetch("http://localhost:8000/send-email", {
+      const res = await fetch("http://localhost:5000/send-email", {
         method: "POST",
         body: formData
       });
@@ -93,6 +103,52 @@ function App() {
       showMessage(error.message, "error");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    if (!body) {
+      showMessage("Please generate an email first before regenerating", "error");
+      return;
+    }
+
+    const instruction = prompt("Enter instructions to regenerate the email body (or leave empty for default improvement):");
+
+    // If user clicks cancel, don't proceed
+    if (instruction === null) {
+      return;
+    }
+
+    setRegenerating(true);
+    setMessage("");
+
+    const formData = new FormData();
+    formData.append("original_body", body);
+    if (instruction && instruction.trim()) {
+      formData.append("instruction", instruction);
+    }
+    if (resumeFile) {
+      formData.append("resume_file", resumeFile);
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/regenerate-body", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Failed to regenerate email body");
+      }
+
+      setBody(data.body || "");
+      showMessage("Email body regenerated successfully!", "success");
+    } catch (error) {
+      showMessage(error.message, "error");
+    } finally {
+      setRegenerating(false);
     }
   };
 
@@ -234,7 +290,30 @@ function App() {
                 </div>
               </div>
 
-              <div className="flex-1">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-700">Email Body</label>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleRegenerate}
+                    disabled={regenerating || !hasGenerated}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Regenerate email body with custom instructions"
+                  >
+                    {regenerating ? (
+                      <>
+                        <Loader2 className="animate-spin" size={16} />
+                        Regenerating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={16} />
+                        Regenerate
+                      </>
+                    )}
+                  </motion.button>
+                </div>
                 <Suspense fallback={<div className="h-64 bg-slate-50 rounded-lg animate-pulse"></div>}>
                   <ReactQuill
                     theme="snow"
