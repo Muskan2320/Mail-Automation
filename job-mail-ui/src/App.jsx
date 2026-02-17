@@ -127,9 +127,7 @@ function App() {
     if (instruction && instruction.trim()) {
       formData.append("instruction", instruction);
     }
-    if (resumeFile) {
-      formData.append("resume_file", resumeFile);
-    }
+    // Resume not sent - already processed during initial generation for efficiency
 
     try {
       const res = await fetch("http://localhost:5000/regenerate-body", {
