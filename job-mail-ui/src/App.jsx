@@ -74,8 +74,8 @@ function App() {
     // Convert <p>...</p> to content with <br> for line breaks
     let processedBody = body
       .replace(/<p>/gi, '')           // Remove opening <p> tags
-      .replace(/<\/p>/gi, '<br>')     // Replace closing </p> with <br>
-      .replace(/(<br>\s*){2,}/gi, '<br>'); // Remove multiple consecutive <br> tags
+      .replace(/<\/p>/gi, '<br><br>') // Replace closing </p> with double <br> for paragraph spacing
+      .replace(/(<br>\s*){3,}/gi, '<br><br>'); // Remove excessive (3+) consecutive <br> tags, keep max 2
 
     const formData = new FormData();
     formData.append("recipient", recipient);
