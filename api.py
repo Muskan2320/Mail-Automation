@@ -43,6 +43,7 @@ async def generate_email_api(
         if email_data.get("error"):
             raise HTTPException(status_code=500, detail="AI failed to generate email")
 
+        print("EMAIL DATA:", email_data)
         return JSONResponse({
             "status": "success",
             "data": email_data

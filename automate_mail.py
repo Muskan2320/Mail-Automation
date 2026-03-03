@@ -13,6 +13,37 @@ SENDER_EMAIL = os.getenv('sender_email')
 SENDER_PASSWORD = os.getenv('sender_password')
 MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024
 
+import re
+
+def plain_text_to_html(text):
+    """
+    Converts plain text with line breaks to clean HTML.
+    Handles Windows/Mac/Linux line endings properly.
+    """
+
+    if not text:
+        return ""
+
+    # Normalize all line endings to \n
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+
+    # Split paragraphs on blank lines (one or more empty lines)
+    paragraphs = re.split(r"\n\s*\n", text.strip())
+
+    html_paragraphs = []
+
+    for p in paragraphs:
+        p = p.replace("\n", "<br>")  # single line break inside paragraph
+        html_paragraphs.append(f"<p>{p}</p>")
+
+    html_body = "".join(html_paragraphs)
+
+    return f"""
+    <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+        {html_body}
+    </div>
+    """
+
 def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None, cc_emails=None):
     try:
         service = get_gmail_service()
@@ -25,8 +56,11 @@ def send_mail_via_oauth(recipient_email, subject, body, attachment_path=None, cc
         message['To'] = recipient_email
         message['From'] = SENDER_EMAIL
         message['Subject'] = subject
-        
+        # Convert plain text body to formatted HTML
+        # html_body = plain_text_to_html(body)
         message.set_content(body, subtype="html")
+
+        print("=====html body====", body, "\n===================")
 
         if cc_emails:
             message['Cc'] = cc_emails
@@ -76,7 +110,11 @@ def send_mail_via_smtp(recipient_email, subject, body, attachment_path=None, cc_
     msg['To'] = recipient_email
     msg['Subject'] = subject
     
+    # Convert plain text body to formatted HTML
+    # html_body = plain_text_to_html(body)
     msg.set_content(body, subtype="html")
+
+    print("=====html body====", body, "\n===================")
 
     if cc_emails:
         msg['Cc'] = cc_emails

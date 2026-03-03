@@ -47,7 +47,7 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
         "body": "mail body here"
     }}
 
-    NOTE: Maintain the format, spacing, line change and data you are generating is inserted into the text editor, so if require highlight the important text also.
+    NOTE: Maintain the format, professionalism, greet initially, spacing, line change and data you are generating is inserted into the text editor, so if require highlight/bold the important text/details (like skills, experience) also using html <b> tag.
     """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
@@ -60,9 +60,12 @@ def generate_mail_dict(jd_text, resume_text=None, resume_links=None):
 
     try:
         data = json.loads(text)
-        
-        if "body" in data and data["body"]:
+        print("\n=============\n", repr(data["body"]), "\n=============\n")
+        if "body" in data:
             data["body"] = data["body"].replace("\n", "<br>")
+
+        print("\n======AFTER BR TAG=======\n", repr(data["body"]), "\n=============\n")
+
         return data
     except Exception:
         return {"error": "Invalid AI JSON format", "raw": response.text}
