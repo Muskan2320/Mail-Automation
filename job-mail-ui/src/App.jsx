@@ -1,6 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
-const ReactQuill = lazy(() => import('react-quill-new'));
-import 'react-quill-new/dist/quill.snow.css';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, FileText, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react';
 
@@ -70,18 +68,16 @@ function App() {
     setSending(true);
     setMessage("");
 
-    // Process body to remove extra paragraph spacing from ReactQuill
-    // Convert <p>...</p> to content with <br> for line breaks
-    let processedBody = body
-      .replace(/<p>/gi, '')           // Remove opening <p> tags
-      .replace(/<\/p>/gi, '<br><br>') // Replace closing </p> with double <br> for paragraph spacing
-      .replace(/(<br>\s*){3,}/gi, '<br><br>'); // Remove excessive (3+) consecutive <br> tags, keep max 2
+    // ReactQuill stores content as HTML (e.g. <p>Hello</p><p>World</p>).
+    // We convert it back to plain text with \n\n between paragraphs,
+    // so the backend always receives plain text — matching Swagger/Postman behavior.
+    // The backend's set_content(..., subtype="html") handles all HTML formatting.
 
     const formData = new FormData();
     formData.append("recipient", recipient);
     formData.append("cc", cc);
     formData.append("subject", subject);
-    formData.append("body", processedBody);
+    formData.append("body", body);
     if (resumeFile) {
       formData.append("resume_file", resumeFile);
     }
@@ -312,15 +308,13 @@ function App() {
                     )}
                   </motion.button>
                 </div>
-                <Suspense fallback={<div className="h-64 bg-slate-50 rounded-lg animate-pulse"></div>}>
-                  <ReactQuill
-                    theme="snow"
-                    value={body}
-                    onChange={setBody}
-                    className="bg-slate-50 rounded-lg"
-                    placeholder="Your email content will be generated here..."
-                  />
-                </Suspense>
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={14}
+                  className="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-purple-500 focus:ring-purple-500 transition-all resize-none p-4 text-slate-700"
+                  placeholder="Your email content will be generated here..."
+                />
               </div>
 
               <motion.button
