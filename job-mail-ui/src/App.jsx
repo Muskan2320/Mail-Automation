@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, FileText, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react';
+import { useState } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react'
 
 function App() {
   const [jdText, setJdText] = useState("We are hiring for Junior AI/ML developer at example.com. We need people with 1 year of experience. Interested candidates mail at hr@example..com or hra@example.com and keep ceo@example.com in cc");
@@ -17,6 +20,17 @@ function App() {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+    ],
+    content: body,
+    onUpdate: ({ editor }) => {
+      setBody(editor.getHTML())
+    },
+  })
 
   const handleGenerate = async () => {
     if (!jdText) {
@@ -49,6 +63,10 @@ function App() {
       setCc(data.data.cc || "");
       setSubject(data.data.subject || "");
       setBody(data.data.body || "");
+
+      if (editor) {
+        editor.commands.setContent(data.data.body || "");
+      }
       setHasGenerated(true);
 
       showMessage("Email generated successfully!", "success");
@@ -308,13 +326,38 @@ function App() {
                     )}
                   </motion.button>
                 </div>
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={14}
-                  className="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-purple-500 focus:ring-purple-500 transition-all resize-none p-4 text-slate-700"
-                  placeholder="Your email content will be generated here..."
-                />
+                <div className="border border-slate-200 rounded-xl p-3 bg-slate-50">
+                  {editor && (
+                    <>
+                      {/* Toolbar */}
+                      <div className="flex gap-2 mb-2 border-b pb-2">
+                        <button
+                          onClick={() => editor.chain().focus().toggleBold().run()}
+                          className={`px-3 py-1 rounded ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'}`}
+                        >
+                          Bold
+                        </button>
+
+                        <button
+                          onClick={() => editor.chain().focus().toggleItalic().run()}
+                          className={`px-3 py-1 rounded ${editor.isActive('italic') ? 'bg-purple-200' : 'bg-white'}`}
+                        >
+                          Italic
+                        </button>
+
+                        <button
+                          onClick={() => editor.chain().focus().toggleUnderline().run()}
+                          className={`px-3 py-1 rounded ${editor.isActive('underline') ? 'bg-purple-200' : 'bg-white'}`}
+                        >
+                          Underline
+                        </button>
+                      </div>
+
+                      {/* Editor */}
+                      <EditorContent editor={editor} className="min-h-[200px] p-2" />
+                    </>
+                  )}
+                </div>
               </div>
 
               <motion.button
