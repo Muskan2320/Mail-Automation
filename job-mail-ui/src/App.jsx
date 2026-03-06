@@ -2,6 +2,14 @@ import { useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
+
+import { TextStyle } from '@tiptap/extension-text-style'
+import Color from '@tiptap/extension-color'
+import Link from '@tiptap/extension-link'
+import TextAlign from '@tiptap/extension-text-align'
+import BulletList from '@tiptap/extension-bullet-list'
+import OrderedList from '@tiptap/extension-ordered-list'
+import ListItem from '@tiptap/extension-list-item'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react'
 
@@ -25,8 +33,25 @@ function App() {
     extensions: [
       StarterKit,
       Underline,
+
+      TextStyle,
+      Color,
+
+      BulletList,
+      OrderedList,
+      ListItem,
+
+      Link.configure({
+        openOnClick: false,
+      }),
+
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
-    content: body,
+
+    content: '',
+
     onUpdate: ({ editor }) => {
       setBody(editor.getHTML())
     },
@@ -330,7 +355,8 @@ function App() {
                   {editor && (
                     <>
                       {/* Toolbar */}
-                      <div className="flex gap-2 mb-2 border-b pb-2">
+                      <div className="flex flex-wrap gap-2 mb-2 border-b pb-2">
+
                         <button
                           onClick={() => editor.chain().focus().toggleBold().run()}
                           className={`px-3 py-1 rounded ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'}`}
@@ -351,8 +377,62 @@ function App() {
                         >
                           Underline
                         </button>
-                      </div>
 
+                        {/* Bullet List */}
+                        <button
+                          onClick={() => editor.chain().focus().toggleBulletList().run()}
+                          className="px-3 py-1 rounded bg-white"
+                        >
+                          • List
+                        </button>
+
+                        {/* Numbered List */}
+                        <button
+                          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                          className="px-3 py-1 rounded bg-white"
+                        >
+                          1. List
+                        </button>
+
+                        {/* Alignment */}
+                        <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className="px-2">L</button>
+                        <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className="px-2">C</button>
+                        <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className="px-2">R</button>
+
+                        {/* Color Picker */}
+                        <input
+                          type="color"
+                          onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
+                          className="w-8 h-8 border rounded cursor-pointer"
+                        />
+
+                        {/* Font Size */}
+                        <select
+                          onChange={(e) =>
+                            editor.chain().focus().setMark('textStyle', { style: `font-size: ${e.target.value}` }).run()
+                          }
+                          className="border rounded px-2"
+                        >
+                          <option value="">Size</option>
+                          <option value="12px">12</option>
+                          <option value="14px">14</option>
+                          <option value="16px">16</option>
+                          <option value="18px">18</option>
+                          <option value="20px">20</option>
+                        </select>
+
+                        {/* Link */}
+                        <button
+                          onClick={() => {
+                            const url = prompt("Enter URL")
+                            if (url) editor.chain().focus().setLink({ href: url }).run()
+                          }}
+                          className="px-3 py-1 rounded bg-white"
+                        >
+                          Link
+                        </button>
+
+                      </div>
                       {/* Editor */}
                       <EditorContent editor={editor} className="min-h-[200px] p-2" />
                     </>
