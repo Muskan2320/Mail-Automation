@@ -4,12 +4,20 @@ import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 
 import { TextStyle } from '@tiptap/extension-text-style'
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  List,
+  ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Link as LinkIcon
+} from "lucide-react"
 import Color from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
-import BulletList from '@tiptap/extension-bullet-list'
-import OrderedList from '@tiptap/extension-ordered-list'
-import ListItem from '@tiptap/extension-list-item'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react'
 
@@ -31,30 +39,30 @@ function App() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        link: false,
+        underline: false
+      }),
+
       Underline,
 
       TextStyle,
       Color,
 
-      BulletList,
-      OrderedList,
-      ListItem,
-
       Link.configure({
-        openOnClick: false,
+        openOnClick: false
       }),
 
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph']
       }),
     ],
 
-    content: '',
+    content: '<p></p>',
 
     onUpdate: ({ editor }) => {
       setBody(editor.getHTML())
-    },
+    }
   })
 
   const handleGenerate = async () => {
@@ -112,7 +120,7 @@ function App() {
     setMessage("");
 
     // ReactQuill stores content as HTML (e.g. <p>Hello</p><p>World</p>).
-    // We convert it back to plain text with \n\n between paragraphs,
+    // We convert it back to plain text with \n\n  between paragraphs,
     // so the backend always receives plain text — matching Swagger/Postman behavior.
     // The backend's set_content(..., subtype="html") handles all HTML formatting.
 
@@ -359,9 +367,9 @@ function App() {
 
                         <button
                           onClick={() => editor.chain().focus().toggleBold().run()}
-                          className={`px-3 py-1 rounded ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'}`}
+                          className={`p-2 rounded ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'}`}
                         >
-                          Bold
+                          <Bold size={18} />
                         </button>
 
                         <button
@@ -381,23 +389,40 @@ function App() {
                         {/* Bullet List */}
                         <button
                           onClick={() => editor.chain().focus().toggleBulletList().run()}
-                          className="px-3 py-1 rounded bg-white"
+                          className="p-2 rounded bg-white"
                         >
-                          • List
+                          <List size={18} />
                         </button>
 
                         {/* Numbered List */}
                         <button
                           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                          className="px-3 py-1 rounded bg-white"
+                          className="p-2 rounded bg-white"
                         >
-                          1. List
+                          <ListOrdered size={18} />
                         </button>
 
                         {/* Alignment */}
-                        <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className="px-2">L</button>
-                        <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className="px-2">C</button>
-                        <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className="px-2">R</button>
+                        <button
+                          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                          className="p-2 rounded bg-white"
+                        >
+                          <AlignLeft size={18} />
+                        </button>
+
+                        <button
+                          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                          className="p-2 rounded bg-white"
+                        >
+                          <AlignCenter size={18} />
+                        </button>
+
+                        <button
+                          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                          className="p-2 rounded bg-white"
+                        >
+                          <AlignRight size={18} />
+                        </button>
 
                         {/* Color Picker */}
                         <input
@@ -427,9 +452,9 @@ function App() {
                             const url = prompt("Enter URL")
                             if (url) editor.chain().focus().setLink({ href: url }).run()
                           }}
-                          className="px-3 py-1 rounded bg-white"
+                          className="p-2 rounded bg-white"
                         >
-                          Link
+                          <LinkIcon size={18} />
                         </button>
 
                       </div>
