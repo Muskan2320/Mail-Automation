@@ -18,6 +18,10 @@ import {
 import Color from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
+import BulletList from '@tiptap/extension-bullet-list'
+import OrderedList from '@tiptap/extension-ordered-list'
+import ListItem from '@tiptap/extension-list-item'
+import Placeholder from "@tiptap/extension-placeholder"
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react'
 
@@ -40,21 +44,36 @@ function App() {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
         link: false,
         underline: false
       }),
 
-      Underline,
+      BulletList,
+      OrderedList,
+      ListItem,
 
+      Underline,
       TextStyle,
       Color,
 
       Link.configure({
-        openOnClick: false
+        openOnClick: true,
+        autolink: true,
+        HTMLAttributes: {
+          target: "_blank",
+          rel: "noopener noreferrer"
+        }
       }),
 
       TextAlign.configure({
         types: ['heading', 'paragraph']
+      }),
+
+      Placeholder.configure({
+        placeholder: "Write your email here..."
       }),
     ],
 
@@ -363,41 +382,51 @@ function App() {
                   {editor && (
                     <>
                       {/* Toolbar */}
-                      <div className="flex flex-wrap gap-2 mb-2 border-b pb-2">
+                      <div className="flex flex-wrap gap-2 mb-2 border-b pb-2 bg-white">
 
                         <button
+                          type="button"
                           onClick={() => editor.chain().focus().toggleBold().run()}
-                          className={`p-2 rounded ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'}`}
+                          className={`px-3 py-1 font-bold rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'
+                            }`}
                         >
-                          <Bold size={18} />
+                          B
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => editor.chain().focus().toggleItalic().run()}
-                          className={`px-3 py-1 rounded ${editor.isActive('italic') ? 'bg-purple-200' : 'bg-white'}`}
+                          className={`px-3 py-1 italic rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-purple-200' : 'bg-white'
+                            }`}
                         >
-                          Italic
+                          I
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => editor.chain().focus().toggleUnderline().run()}
-                          className={`px-3 py-1 rounded ${editor.isActive('underline') ? 'bg-purple-200' : 'bg-white'}`}
+                          className={`px-3 py-1 underline rounded hover:bg-gray-200 ${editor.isActive('underline') ? 'bg-purple-200' : 'bg-white'
+                            }`}
                         >
-                          Underline
+                          U
                         </button>
 
                         {/* Bullet List */}
                         <button
+                          type="button"
                           onClick={() => editor.chain().focus().toggleBulletList().run()}
-                          className="p-2 rounded bg-white"
+                          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-purple-200' : ''
+                            }`}
                         >
                           <List size={18} />
                         </button>
 
                         {/* Numbered List */}
                         <button
+                          type="button"
                           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                          className="p-2 rounded bg-white"
+                          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-purple-200' : ''
+                            }`}
                         >
                           <ListOrdered size={18} />
                         </button>
@@ -432,25 +461,20 @@ function App() {
                         />
 
                         {/* Font Size */}
-                        <select
-                          onChange={(e) =>
-                            editor.chain().focus().setMark('textStyle', { style: `font-size: ${e.target.value}` }).run()
-                          }
-                          className="border rounded px-2"
-                        >
-                          <option value="">Size</option>
-                          <option value="12px">12</option>
-                          <option value="14px">14</option>
-                          <option value="16px">16</option>
-                          <option value="18px">18</option>
-                          <option value="20px">20</option>
-                        </select>
+
 
                         {/* Link */}
                         <button
                           onClick={() => {
-                            const url = prompt("Enter URL")
-                            if (url) editor.chain().focus().setLink({ href: url }).run()
+                            let url = prompt("Enter URL")
+
+                            if (url) {
+                              if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                                url = "https://" + url
+                              }
+
+                              editor.chain().focus().setLink({ href: url }).run()
+                            }
                           }}
                           className="p-2 rounded bg-white"
                         >
@@ -459,7 +483,12 @@ function App() {
 
                       </div>
                       {/* Editor */}
-                      <EditorContent editor={editor} className="min-h-[200px] p-2" />
+                      <div
+                        className="editor-wrapper"
+                        onClick={() => editor?.chain().focus().run()}
+                      >
+                        <EditorContent editor={editor} />
+                      </div>
                     </>
                   )}
                 </div>
