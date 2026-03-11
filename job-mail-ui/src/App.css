@@ -11,9 +11,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -22,6 +24,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -39,4 +42,68 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.ProseMirror ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+}
+
+.ProseMirror li {
+  display: list-item !important;
+}
+
+.ProseMirror ul li::marker {
+  font-size: 1em;
+}
+
+.ProseMirror ol li::marker {
+  font-size: 1em;
+}
+
+.ProseMirror a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror a:hover {
+  color: #1d4ed8;
+}
+
+.ProseMirror {
+  min-height: 200px;
+  padding: 10px;
+  outline: none;
+  cursor: text;
+}
+
+/* TipTap editor */
+
+.ProseMirror {
+  min-height: 260px;
+  padding: 12px;
+  outline: none;
+  cursor: text;
+  text-align: left;
+  height: 100%;
+}
+
+.ProseMirror p {
+  margin: 0;
+  border: none !important;
+  outline: none !important;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  pointer-events: none;
+  float: left;
+  height: 0;
 }

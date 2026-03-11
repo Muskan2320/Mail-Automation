@@ -8,18 +8,51 @@
   }
 }
 
-.ql-container {
-  @apply rounded-b-lg border-t-0 bg-white/50 backdrop-blur-sm !important;
-  border-color: #e2e8f0 !important;
-  min-height: 200px;
-  font-family: inherit !important;
+/* TipTap Editor Styling */
+
+.ProseMirror {
+  min-height: 220px;
+  padding: 12px;
+  outline: none;
+  cursor: text;
+  text-align: left;
 }
 
-.ql-toolbar {
-  @apply rounded-t-lg bg-white/80 backdrop-blur-sm border-slate-200 !important;
-  border-bottom: 0px !important;
+/* Remove weird paragraph box */
+.ProseMirror p {
+  margin: 0;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
 }
 
-.ql-editor {
-  min-height: 200px;
+/* Lists */
+.ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+/* Links */
+.ProseMirror a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.editor-wrapper {
+  min-height: 260px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  background: white;
+  cursor: text;
+}
+
+.editor-wrapper:focus-within {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
 }
