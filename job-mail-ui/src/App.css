@@ -44,16 +44,6 @@
   color: #888;
 }
 
-.ProseMirror ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-}
-
-.ProseMirror ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-}
-
 .ProseMirror li {
   display: list-item;
 }
@@ -74,31 +64,6 @@
 
 .ProseMirror a:hover {
   color: #1d4ed8;
-}
-
-.ProseMirror {
-  min-height: 200px;
-  padding: 10px;
-  outline: none;
-  cursor: text;
-}
-
-/* TipTap editor */
-
-.ProseMirror {
-  min-height: 260px;
-  padding: 12px;
-  outline: none;
-  cursor: text;
-  text-align: left;
-  height: 100%;
-  line-height: 1.6;
-}
-
-.ProseMirror p {
-  margin: 0.35rem 0;
-  border: none;
-  outline: none;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
