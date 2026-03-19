@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
+import EmojiPicker from "emoji-picker-react"
 
 import { TextStyle } from '@tiptap/extension-text-style'
 import {
@@ -24,6 +25,40 @@ import ListItem from '@tiptap/extension-list-item'
 import Placeholder from "@tiptap/extension-placeholder"
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react'
+import { Extension } from '@tiptap/core'
+
+const FontFamily = Extension.create({
+  name: 'fontFamily',
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          fontFamily: {
+            default: null,
+            parseHTML: element => element.style.fontFamily,
+            renderHTML: attributes => {
+              if (!attributes.fontFamily) return {}
+              return {
+                style: `font-family: ${attributes.fontFamily}`
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+
+  addCommands() {
+    return {
+      setFontFamily:
+        font =>
+          ({ chain }) =>
+            chain().setMark('textStyle', { fontFamily: font }).run(),
+    }
+  },
+})
 
 function App() {
   const [jdText, setJdText] = useState("We are hiring for Junior AI/ML developer at example.com. We need people with 1 year of experience. Interested candidates mail at hr@example..com or hra@example.com and keep ceo@example.com in cc");
@@ -40,6 +75,22 @@ function App() {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
+  const [selectedFont, setSelectedFont] = useState("Sans Serif");
+  const [showEmoji, setShowEmoji] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowEmoji(false)
+    }
+
+    if (showEmoji) {
+      document.addEventListener("click", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside)
+    }
+  }, [showEmoji])
 
   const editor = useEditor({
     extensions: [
@@ -58,6 +109,7 @@ function App() {
       Underline,
       TextStyle,
       Color,
+      FontFamily,
 
       Link.configure({
         openOnClick: true,
@@ -382,7 +434,7 @@ function App() {
                   {editor && (
                     <>
                       {/* Toolbar */}
-                      <div className="flex flex-wrap gap-2 mb-2 border-b pb-2 bg-white">
+                      <div className="relative flex flex-wrap gap-2 mb-2 border-b pb-2 bg-white">
 
                         <button
                           type="button"
@@ -432,21 +484,21 @@ function App() {
                         </button>
 
                         {/* Alignment */}
-                        <button
+                        <button type="button"
                           onClick={() => editor.chain().focus().setTextAlign('left').run()}
                           className="p-2 rounded bg-white"
                         >
                           <AlignLeft size={18} />
                         </button>
 
-                        <button
+                        <button type="button"
                           onClick={() => editor.chain().focus().setTextAlign('center').run()}
                           className="p-2 rounded bg-white"
                         >
                           <AlignCenter size={18} />
                         </button>
 
-                        <button
+                        <button type="button"
                           onClick={() => editor.chain().focus().setTextAlign('right').run()}
                           className="p-2 rounded bg-white"
                         >
@@ -460,11 +512,28 @@ function App() {
                           className="w-8 h-8 border rounded cursor-pointer"
                         />
 
-                        {/* Font Size */}
+                        {/* Font Family */}
+                        <select
+                          value={selectedFont}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            const label = e.target.options[e.target.selectedIndex].text
+
+                            setSelectedFont(label)
+                            editor.chain().focus().setFontFamily(value).run()
+                          }}
+                          className="border rounded px-2 bg-white"
+                        >
+                          <option value="Arial, sans-serif">Sans Serif</option>
+                          <option value="Times New Roman, serif">Serif</option>
+                          <option value="Courier New, monospace">Fixed Width</option>
+                          <option value="Georgia, serif">Georgia</option>
+                          <option value="Verdana, sans-serif">Verdana</option>
+                        </select>
 
 
                         {/* Link */}
-                        <button
+                        <button type="button"
                           onClick={() => {
                             let url = prompt("Enter URL")
 
@@ -480,6 +549,32 @@ function App() {
                         >
                           <LinkIcon size={18} />
                         </button>
+
+                        {/* Emoji Picker */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowEmoji(!showEmoji)
+                          }}
+                          className="p-2 rounded hover:bg-gray-200"
+                        >
+                          😊
+                        </button>
+
+                        {showEmoji && (
+                          <div
+                            className="absolute z-50 mt-2 right-0 shadow-lg"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <EmojiPicker
+                              onEmojiClick={(emojiData) => {
+                                editor.chain().focus().insertContent(emojiData.emoji).run()
+                                setShowEmoji(false)
+                              }}
+                            />
+                          </div>
+                        )}
 
                       </div>
                       {/* Editor */}
