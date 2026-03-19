@@ -434,80 +434,93 @@ function App() {
                   {editor && (
                     <>
                       {/* Toolbar */}
-                      <div className="relative flex flex-wrap gap-2 mb-2 border-b pb-2 bg-white">
+                      <div className="relative flex flex-wrap items-center gap-3 mb-3 p-3 bg-white rounded-lg border border-slate-200">
 
-                        <button
-                          type="button"
-                          onClick={() => editor.chain().focus().toggleBold().run()}
-                          className={`px-3 py-1 font-bold rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-purple-200' : 'bg-white'
-                            }`}
-                        >
-                          B
-                        </button>
+                        {/* Formatting */}
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            title="Bold"
+                            onClick={() => editor.chain().focus().toggleBold().run()}
+                            className={`px-2 py-1 font-bold rounded hover:bg-purple-50 ${editor.isActive('bold') ? 'bg-purple-200' : ''}`}
+                          >
+                            B
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => editor.chain().focus().toggleItalic().run()}
-                          className={`px-3 py-1 italic rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-purple-200' : 'bg-white'
-                            }`}
-                        >
-                          I
-                        </button>
+                          <button
+                            type="button"
+                            title="Italic"
+                            onClick={() => editor.chain().focus().toggleItalic().run()}
+                            className={`px-2 py-1 italic rounded hover:bg-purple-50 ${editor.isActive('italic') ? 'bg-purple-200' : ''}`}
+                          >
+                            I
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => editor.chain().focus().toggleUnderline().run()}
-                          className={`px-3 py-1 underline rounded hover:bg-gray-200 ${editor.isActive('underline') ? 'bg-purple-200' : 'bg-white'
-                            }`}
-                        >
-                          U
-                        </button>
+                          <button
+                            type="button"
+                            title="Underline"
+                            onClick={() => editor.chain().focus().toggleUnderline().run()}
+                            className={`px-2 py-1 underline rounded hover:bg-purple-50 ${editor.isActive('underline') ? 'bg-purple-200' : ''}`}
+                          >
+                            U
+                          </button>
+                        </div>
 
-                        {/* Bullet List */}
-                        <button
-                          type="button"
-                          onClick={() => editor.chain().focus().toggleBulletList().run()}
-                          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-purple-200' : ''
-                            }`}
-                        >
-                          <List size={18} />
-                        </button>
+                        {/* Lists */}
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            title="Bullet List"
+                            onClick={() => editor.chain().focus().toggleBulletList().run()}
+                            className={`p-2 rounded hover:bg-purple-50 ${editor.isActive('bulletList') ? 'bg-purple-200' : ''}`}
+                          >
+                            <List size={16} />
+                          </button>
 
-                        {/* Numbered List */}
-                        <button
-                          type="button"
-                          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-purple-200' : ''
-                            }`}
-                        >
-                          <ListOrdered size={18} />
-                        </button>
+                          <button
+                            type="button"
+                            title="Numbered List"
+                            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                            className={`p-2 rounded hover:bg-purple-50 ${editor.isActive('orderedList') ? 'bg-purple-200' : ''}`}
+                          >
+                            <ListOrdered size={16} />
+                          </button>
+                        </div>
 
                         {/* Alignment */}
-                        <button type="button"
-                          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                          className="p-2 rounded bg-white"
-                        >
-                          <AlignLeft size={18} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            title="Align Left"
+                            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                            className="p-2 rounded hover:bg-purple-50"
+                          >
+                            <AlignLeft size={16} />
+                          </button>
 
-                        <button type="button"
-                          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                          className="p-2 rounded bg-white"
-                        >
-                          <AlignCenter size={18} />
-                        </button>
+                          <button
+                            type="button"
+                            title="Align Center"
+                            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                            className="p-2 rounded hover:bg-purple-50"
+                          >
+                            <AlignCenter size={16} />
+                          </button>
 
-                        <button type="button"
-                          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                          className="p-2 rounded bg-white"
-                        >
-                          <AlignRight size={18} />
-                        </button>
+                          <button
+                            type="button"
+                            title="Align Right"
+                            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                            className="p-2 rounded hover:bg-purple-50"
+                          >
+                            <AlignRight size={16} />
+                          </button>
+                        </div>
 
-                        {/* Color Picker */}
+                        {/* Color */}
                         <input
                           type="color"
+                          title="Text Color"
                           onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
                           className="w-8 h-8 border rounded cursor-pointer"
                         />
@@ -522,7 +535,7 @@ function App() {
                             setSelectedFont(label)
                             editor.chain().focus().setFontFamily(value).run()
                           }}
-                          className="border rounded px-2 bg-white"
+                          className="border rounded px-2 py-1 bg-white hover:bg-purple-50"
                         >
                           <option value="Arial, sans-serif">Sans Serif</option>
                           <option value="Times New Roman, serif">Serif</option>
@@ -531,9 +544,10 @@ function App() {
                           <option value="Verdana, sans-serif">Verdana</option>
                         </select>
 
-
                         {/* Link */}
-                        <button type="button"
+                        <button
+                          type="button"
+                          title="Insert Link"
                           onClick={() => {
                             let url = prompt("Enter URL")
 
@@ -545,23 +559,25 @@ function App() {
                               editor.chain().focus().setLink({ href: url }).run()
                             }
                           }}
-                          className="p-2 rounded bg-white"
+                          className="p-2 rounded hover:bg-purple-50"
                         >
-                          <LinkIcon size={18} />
+                          <LinkIcon size={16} />
                         </button>
 
-                        {/* Emoji Picker */}
+                        {/* Emoji */}
                         <button
                           type="button"
+                          title="Insert Emoji"
                           onClick={(e) => {
                             e.stopPropagation()
                             setShowEmoji(!showEmoji)
                           }}
-                          className="p-2 rounded hover:bg-gray-200"
+                          className="p-2 rounded hover:bg-purple-50"
                         >
                           😊
                         </button>
 
+                        {/* Emoji Picker */}
                         {showEmoji && (
                           <div
                             className="absolute z-50 mt-2 right-0 shadow-lg"
@@ -577,6 +593,7 @@ function App() {
                         )}
 
                       </div>
+
                       {/* Editor */}
                       <div
                         className="editor-wrapper"
