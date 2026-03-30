@@ -94,13 +94,17 @@ def regenerate_mail_body(original_body: str, instruction: str | None = None, res
     {resume_text if resume_text else "Resume not available."}
 
     --- TASK ---
-    Rewrite ONLY the email body based on the instruction.
-    Keep it professional and concise.
+    Rewrite ONLY the email body based on the user instruction.
+    Keep it professional, concise and as per resume skills do not bluff about skills if not in resume.
     Do NOT add subject or recipient.
+    Keep initial greetings and signature as it is untill asked to changed by user.
     Return ONLY the rewritten body as plain text.
+
+    NOTE: Maintain the format, professionalism, greet initially, spacing, line change and data you are generating is inserted into the text editor, so if require highlight/bold the important text/details (like skills, experience) also using html <b> tag.
     """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
     response = model.generate_content(prompt)
 
+    print("=====================^^^^^^^^^^^^^^^^^^^^^^^^^^^^^================\n\n", response.text.strip())
     return response.text.strip()
