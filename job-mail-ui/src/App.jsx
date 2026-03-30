@@ -247,6 +247,7 @@ function App() {
     }
     // Resume not sent - already processed during initial generation for efficiency
 
+    const previousBody = body;
     try {
       const res = await fetch("http://localhost:5000/regenerate-body", {
         method: "POST",
@@ -259,10 +260,21 @@ function App() {
         throw new Error(data.detail || "Failed to regenerate email body");
       }
 
-      setBody(data.body || "");
+      setBody(data.body);
+
+      if (editor) {
+        editor.commands.setContent(data.body);
+      }
       showMessage("Email body regenerated successfully!", "success");
     } catch (error) {
-      showMessage(error.message, "error");
+      console.error("Regenerate error:", error);
+      showMessage(error.message || "Something went wrong while regenerating", "error");
+
+      if (editor) {
+        editor.commands.setContent(previousBody);
+      }
+
+      setBody(previousBody);
     } finally {
       setRegenerating(false);
     }
