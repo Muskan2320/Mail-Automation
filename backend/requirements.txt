@@ -7,3 +7,4 @@ email-validator
 google-generativeai
 
 python-dotenv
+pdfplumber
