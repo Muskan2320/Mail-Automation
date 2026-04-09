@@ -5,6 +5,7 @@ pydantic
 email-validator
 
 google-generativeai
+google-auth-oauthlib
 
 python-dotenv
 pdfplumber
