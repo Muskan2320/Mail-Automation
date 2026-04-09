@@ -28,6 +28,7 @@ import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-r
 import { Extension } from '@tiptap/core'
 
 const BASE_API_URL = import.meta.env.BASE_API_URL;
+console.log("API URL:", BASE_API_URL);
 const FontFamily = Extension.create({
   name: 'fontFamily',
 
