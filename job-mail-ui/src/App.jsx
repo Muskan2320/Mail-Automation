@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Sparkles, Loader2, Mail, Briefcase, X, RefreshCw } from 'lucide-react'
 import { Extension } from '@tiptap/core'
 
+const BASE_API_URL = import.meta.env.BASE_API_URL;
 const FontFamily = Extension.create({
   name: 'fontFamily',
 
@@ -152,7 +153,7 @@ function App() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/generate-email", {
+      const res = await fetch(`${BASE_API_URL}/generate-email`, {
         method: "POST",
         body: formData
       });
@@ -190,11 +191,6 @@ function App() {
     setSending(true);
     setMessage("");
 
-    // ReactQuill stores content as HTML (e.g. <p>Hello</p><p>World</p>).
-    // We convert it back to plain text with \n\n  between paragraphs,
-    // so the backend always receives plain text — matching Swagger/Postman behavior.
-    // The backend's set_content(..., subtype="html") handles all HTML formatting.
-
     const formData = new FormData();
     formData.append("recipient", recipient);
     formData.append("cc", cc);
@@ -205,7 +201,7 @@ function App() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/send-email", {
+      const res = await fetch(`${BASE_API_URL}/send-email`, {
         method: "POST",
         body: formData
       });
@@ -249,7 +245,7 @@ function App() {
 
     const previousBody = body;
     try {
-      const res = await fetch("http://localhost:5000/regenerate-body", {
+      const res = await fetch(`${BASE_API_URL}/regenerate-body`, {
         method: "POST",
         body: formData
       });
