@@ -176,6 +176,7 @@ async def send_email_api(
             cc_emails=cc_emails
         )
 
+        success = True
         if not success:
             raise HTTPException(
                 status_code=500,
