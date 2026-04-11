@@ -108,6 +108,7 @@ async def send_email_api(
     cc: str | None = Form(None),
     resume_file: UploadFile | None = File(None)
 ):
+    logger.info(f"Sending email to: {recipient}, cc: {cc_emails}")
     resume_path = None
     tmp_dir = None
 
