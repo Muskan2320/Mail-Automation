@@ -192,6 +192,10 @@ function App() {
     setSending(true);
     setMessage("");
 
+    console.log("recipient", recipient);
+    console.log("cc", cc);
+    console.log("subject", subject);
+    console.log("body", body);
     const formData = new FormData();
     formData.append("recipient", recipient);
     formData.append("cc", cc);
