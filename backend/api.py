@@ -108,12 +108,13 @@ async def send_email_api(
     cc: str | None = Form(None),
     resume_file: UploadFile | None = File(None)
 ):
-    logger.info(f"Sending email to: {recipient}, cc: {cc_emails}")
+    logger.info(f"Sending email to: {recipient}, cc: {cc}")
+    print("ENTERED")
     resume_path = None
     tmp_dir = None
 
     try:
-        if not all([recipient.strip(), subject.strip(), body.strip()]):
+        if not all([recipient, subject.strip(), body.strip()]):
             raise HTTPException(
                 status_code=400,
                 detail={
@@ -126,7 +127,7 @@ async def send_email_api(
         recipient_list = [
             email.strip()
             for email in recipient.split(",")
-            if email.strip()
+            if email.strip() and "@" in email
         ]
 
         # Convert cc → list (future-proof)
