@@ -45,6 +45,6 @@ class RegenerateRequest(BaseModel):
 
 class ErrorResponse(BaseModel):
     status: str = "error"
-    error_code: str
+    error_code: int
     message: str
     details: Optional[Any] = None

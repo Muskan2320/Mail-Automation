@@ -40,7 +40,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     error_code = exc.status_code
     message = exc.detail
 
-    if not isinstance(message, str):
+    if isinstance(message, list) and len(message) > 0:
+        message = message[0].get("msg", str(message))
+    elif isinstance(message, dict):
+        message = message.get("message", str(message))
+    elif not isinstance(message, str):
         message = str(message)
 
     return JSONResponse(
@@ -48,7 +52,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content=ErrorResponse(
             error_code=error_code,
             message=message
-        ).dict()
+        ).model_dump()
     )
 
 
