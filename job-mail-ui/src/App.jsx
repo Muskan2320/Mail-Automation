@@ -207,6 +207,9 @@ function App() {
 
     console.log("formData", formData);
     console.log("Called send email");
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
     try {
       const res = await fetch(`${BASE_API_URL}/send-email`, {
         method: "POST",
