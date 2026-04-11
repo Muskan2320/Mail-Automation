@@ -37,14 +37,11 @@ app.add_middleware(
 # ---------- Global Error Handler ----------
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    detail = exc.detail
+    error_code = exc.status_code
+    message = exc.detail
 
-    if isinstance(detail, dict):
-        error_code = detail.get("code", "HTTP_ERROR")
-        message = detail.get("message", "Something went wrong")
-    else:
-        error_code = "HTTP_ERROR"
-        message = detail
+    if not isinstance(message, str):
+        message = str(message)
 
     return JSONResponse(
         status_code=exc.status_code,
