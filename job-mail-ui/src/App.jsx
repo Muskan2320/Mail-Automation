@@ -201,16 +201,22 @@ function App() {
       formData.append("resume_file", resumeFile);
     }
 
+    console.log("formData", formData);
+    console.log("Called send email");
     try {
       const res = await fetch(`${BASE_API_URL}/send-email`, {
         method: "POST",
         body: formData
       });
 
-      const data = await res.json();
+      const text = await res.text();
 
-      if (!res.ok) {
-        throw new Error(data.detail || "Failed to send email");
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Non-JSON response from backend:", text);
+        throw new Error("Server returned invalid response");
       }
 
       showMessage("Email sent successfully!", "success");
