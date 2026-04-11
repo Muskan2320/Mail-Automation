@@ -109,7 +109,6 @@ async def send_email_api(
     resume_file: UploadFile | None = File(None)
 ):
     logger.info(f"Sending email to: {recipient}, cc: {cc}")
-    print("ENTERED")
     resume_path = None
     tmp_dir = None
 
@@ -177,7 +176,7 @@ async def send_email_api(
             cc_emails=cc_emails
         )
 
-        success = True
+        logger.info(f"Email sent successfully: {success}")
         if not success:
             raise HTTPException(
                 status_code=500,
