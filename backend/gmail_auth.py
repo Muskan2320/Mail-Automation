@@ -20,7 +20,11 @@ def run_oauth_with_timeout(timeout_sec=60):
     def oauth_flow():
         try:
             flow = InstalledAppFlow.from_client_secrets_file(CRED_PATH, SCOPES)
-            creds_container["creds"] = flow.run_local_server(port=8080)
+            creds_container["creds"] = flow.run_local_server(
+            port=8080,
+            access_type="offline",
+            prompt="consent"
+            )
         except Exception:
             creds_container["creds"] = None
 
