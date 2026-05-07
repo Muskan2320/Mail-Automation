@@ -252,10 +252,14 @@ function App() {
 
     const formData = new FormData();
     formData.append("original_body", body);
+
     if (instruction && instruction.trim()) {
       formData.append("instruction", instruction);
     }
-    // Resume not sent - already processed during initial generation for efficiency
+
+    if (resumeFile) {
+      formData.append("resume_file", resumeFile);
+    }
 
     const previousBody = body;
     try {
