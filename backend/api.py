@@ -28,7 +28,7 @@ app = FastAPI(title="AI Job Application Email Generator API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["https://mail-automation-seven.vercel.app"],
+    allow_origins = ["http://localhost:5173", "https://mail-automation-seven.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -232,24 +232,39 @@ async def regenerate_body_api(
     resume_text = None
 
     try:
+        logger.info("Regenerate endpoint called")
+
         if not original_body.strip():
             raise HTTPException(
                 status_code=400,
-                detail={"code": "BODY_MISSING", "message": "Original email body is required"}
+                detail={
+                    "code": "BODY_MISSING",
+                    "message": "Original email body is required"
+                }
             )
 
         if resume_file:
+            logger.info(f"Resume file received: {resume_file.filename}")
+            
             if resume_file.content_type != "application/pdf":
                 raise HTTPException(
                     status_code=400,
-                    detail={"code": "INVALID_FILE", "message": "Resume must be PDF"}
+                    detail={
+                        "code": "INVALID_FILE",
+                        "message": "Resume must be PDF"
+                    }
                 )
 
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                 tmp.write(await resume_file.read())
                 resume_path = tmp.name
 
+            logger.info(f"Temporary resume path: {resume_path}")
+
             resume_text, _ = extract_text_from_pdf(resume_path)
+
+            logger.info("Resume text extracted successfully")
+
             os.remove(resume_path)
 
         final_instruction = (
@@ -258,11 +273,36 @@ async def regenerate_body_api(
             else "Rewrite the email to be clearer and more concise while keeping the same intent."
         )
 
+        logger.info(f"Final instruction: {final_instruction}")
+
+        logger.info("Calling regenerate_mail_body")
+
         new_body = regenerate_mail_body(
             original_body=original_body,
             instruction=final_instruction,
             resume_text=resume_text
         )
+
+        logger.info(f"Regenerated body type: {type(new_body)}")
+        logger.info(f"Regenerated body: {new_body}")
+
+        if not isinstance(new_body, str):
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "code": "INVALID_AI_RESPONSE",
+                    "message": "AI did not return valid text response"
+                }
+            )
+
+        if not new_body.strip():
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "code": "EMPTY_AI_RESPONSE",
+                    "message": "AI returned empty response"
+                }
+            )
 
         return RegenerateResponse(
             status="success",
@@ -271,8 +311,14 @@ async def regenerate_body_api(
 
     except HTTPException:
         raise
+
     except Exception as e:
+        logger.exception("Regenerate endpoint failed")
+
         raise HTTPException(
             status_code=500,
-            detail={"code": "INTERNAL_ERROR", "message": f"Failed to regenerate email: {str(e)}"}
+            detail={
+                "code": "INTERNAL_ERROR",
+                "message": f"Failed to regenerate email: {str(e)}"
+            }
         )
